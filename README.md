@@ -1,7 +1,7 @@
 # Catalog Browser (local_catalog_browser)
 
-![Moodle](https://img.shields.io/badge/Moodle-4.2+-orange?logo=moodle)
-![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4?logo=php&logoColor=white)
+![Moodle](https://img.shields.io/badge/Moodle-4.3+-orange?logo=moodle)
+![PHP](https://img.shields.io/badge/PHP-8.3+-777BB4?logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL%20v3-green?logo=gnu)
 ![Version](https://img.shields.io/badge/Version-1.0.0-blue)
 

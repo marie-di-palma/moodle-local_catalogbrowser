@@ -35,10 +35,11 @@ $plugin->component = 'local_catalog_browser';
 // Incrementing this number will trigger an upgrade prompt in Moodle.
 $plugin->version = 2026022506;
 
-// Minimum Moodle version required to run this plugin (Moodle 4.2).
+// Minimum Moodle version required to run this plugin (Moodle 4.3).
 // The core_external namespace used by this plugin was introduced in Moodle 4.2.
-// Installation on older Moodle versions will be blocked.
-$plugin->requires = 2023042400;
+// However, Moodle 4.3 is the first version to officially support PHP 8.3,
+// which is the minimum PHP version this plugin has been tested with.
+$plugin->requires = 2023100900;
 
 // Human-readable version label — for display purposes only, no technical effect.
 $plugin->release = '1.0';
