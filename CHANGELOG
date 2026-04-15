@@ -1,0 +1,28 @@
+# Changelog
+All notable changes to local_catalog_browser will be documented in this file.
+
+## [1.0.0] - 2026-03-08
+
+### Added
+- Initial release
+- Course filtering by custom field values (text, select, checkbox, number, textarea)
+- Course title filter with AJAX autocomplete suggestions (optional, enabled by default)
+- Native Moodle tag filter with pill-based selector and dropdown autocomplete (optional, enabled by default)
+- Filter by Moodle course category (optional, enabled by default)
+- Dynamic AJAX search: results update without page reload as filters change
+- Sort results by alphabetical order (A→Z), most recently created, or default Moodle order
+- Paginated results with configurable page size
+- Course cards displaying overview image, tags, and truncated summary
+- Course preview page for unauthenticated users, with full description, tags, and back-to-catalog navigation preserving filters and pagination state
+- Authenticated users are redirected directly to the Moodle course page — enrolment handled natively by Moodle
+- Reset button to clear all active filters
+- Keyboard navigation in all autocomplete dropdowns (arrow keys, Enter, Escape)
+- Autocomplete suggestions limited to 10 results per query
+- Only visible courses are returned in search results
+- Custom fields with visibility set to "Nobody" are excluded from filters
+- Placeholder text generated from custom field description, with fallback to field name
+- Plugin settings: custom field category selector, title/category/tag filter toggles, configurable tag selection limit (1–25), results per page, guest access toggle
+- Guest access toggle automatically syncs the guest role capability at system context
+- Catalog page URL displayed in plugin settings for easy access and sharing
+- English and French language strings
+- Capability `local/catalog_browser:view` with default access for all authenticated user roles

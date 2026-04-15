@@ -1,0 +1,363 @@
+{{!
+    Template for the catalog browser search page.
+    Renders the filter form, sort bar, course results, and pagination.
+    Dynamic search updates are handled by the AMD module local_catalog_browser/search.
+
+    @template local_catalog_browser/catalog_browser
+
+    @param {Array} fields - Custom field filter inputs.
+    @param {string} filtertitle - Current course title filter value.
+    @param {bool} show_title_filter - Whether to show the course title filter.
+    @param {bool} has_category_filter - Whether to show the category filter.
+    @param {Array} categories - List of categories for the dropdown.
+    @param {bool} has_tags - Whether to show the tag filter.
+    @param {string} tags_json - JSON array of all available tags.
+    @param {int} maxtags - Maximum number of selectable tags.
+    @param {string} limitmsgtags - Message shown when tag limit is reached.
+    @param {bool} has_popular_tags - Whether to show popular tag suggestions.
+    @param {Array} popular_tags - Popular tag suggestions.
+    @param {string} populartags_label - Label for the popular tags block.
+    @param {string} remove_tag_string - Localised label for the tag pill remove button.
+    @param {int} results_count - Total number of matching courses.
+    @param {bool} has_courses - Whether any courses are on this page.
+    @param {bool} no_results - Whether the search returned no results at all.
+    @param {Array} courses - Course card data for the current page.
+    @param {bool} sort_az - True when alphabetical sort is active.
+    @param {bool} sort_recent - True when most-recent sort is active.
+    @param {bool} sort_moodle - True when default sort is active.
+    @param {string} sorturl_az - URL for alphabetical sort.
+    @param {string} sorturl_recent - URL for most-recent sort.
+    @param {string} sorturl_moodle - URL for default sort.
+    @param {bool} has_pagination - Whether to show the pagination nav.
+    @param {Array} pagination - Array of page link data.
+    @param {int} perpage - Results per page.
+    @param {string} search_url - Plugin page URL for the reset button and sort links.
+    @param {string} results_dynamic_string - Localised results count string for JS.
+    @param {string} noresults_string - Localised no-results string for JS.
+
+    @package    local_catalog_browser
+    @copyright  2026 Marie Di Palma
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    Example context (json):
+    {
+        "fields": [],
+        "filtertitle": "",
+        "show_title_filter": true,
+        "has_category_filter": false,
+        "categories": [],
+        "has_tags": false,
+        "tags_json": "[]",
+        "maxtags": 3,
+        "limitmsgtags": "You can select up to 3 tags.",
+        "has_popular_tags": false,
+        "popular_tags": [],
+        "populartags_label": "Popular:",
+        "remove_tag_string": "Remove tag",
+        "results_count": 1,
+        "has_courses": true,
+        "no_results": false,
+        "courses": [
+            {
+                "fullname": "Example course",
+                "url": "http://example.com/course",
+                "imgurl": "",
+                "summary": "A short summary.",
+                "tags": []
+            }
+        ],
+        "sort_az": true,
+        "sort_recent": false,
+        "sort_moodle": false,
+        "sorturl_az": "http://example.com/index.php?sort=az",
+        "sorturl_recent": "http://example.com/index.php?sort=recent",
+        "sorturl_moodle": "http://example.com/index.php?sort=moodle",
+        "has_pagination": false,
+        "pagination": [],
+        "perpage": 10,
+        "search_url": "http://example.com/index.php",
+        "results_dynamic_string": "__COUNT__ results",
+        "noresults_string": "No courses found."
+    }
+}}
+
+<div class="container-fluid px-0">
+
+    {{! Search filter form. Action URL uses triple braces to prevent & escaping. }}
+    <form method="get" action="{{{search_url}}}" aria-label="{{#str}}pagetitle, local_catalog_browser{{/str}}">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-5">
+
+                    {{! Course title text filter — shown only if enabled in plugin settings. }}
+                    {{#show_title_filter}}
+                    <div class="col-12 col-sm-6 col-lg-3 pb-3">
+                        <label for="coursetitle" class="form-label fw-semibold mb-0">
+                            {{#str}}filtertitle, local_catalog_browser{{/str}}
+                        </label>
+                        <input type="text"
+                            id="coursetitle"
+                            name="coursetitle"
+                            class="form-control"
+                            data-fieldname="coursetitle"
+                            value="{{filtertitle}}"
+                            placeholder="{{#str}}filtertitle_placeholder, local_catalog_browser{{/str}}"
+                            autocomplete="off"
+                            aria-label="{{#str}}filtertitle, local_catalog_browser{{/str}}"
+                            role="combobox"
+                            aria-expanded="false"
+                            aria-autocomplete="list">
+                    </div>
+                    {{/show_title_filter}}
+
+                    {{! Moodle course category filter — shown only if enabled in plugin settings. }}
+                    {{#has_category_filter}}
+                    <div class="col-12 col-sm-6 col-lg-3 pb-3">
+                        <label for="categoryid" class="form-label fw-semibold mb-0">
+                            {{#str}}filtercategory, local_catalog_browser{{/str}}
+                        </label>
+                        <select id="categoryid" name="categoryid"
+                            class="form-select d-block w-100"
+                            aria-label="{{#str}}filtercategory, local_catalog_browser{{/str}}">
+                            <option value="0">{{#str}}filtercategory_all, local_catalog_browser{{/str}}</option>
+                            {{#categories}}
+                            <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                            {{/categories}}
+                        </select>
+                    </div>
+                    {{/has_category_filter}}
+
+                    {{! Custom field filters — one column per field, rendered by type. }}
+                    {{#fields}}
+                    <div class="col-12 col-sm-6 col-lg-3 pb-3">
+                        <label for="{{shortname}}" class="form-label fw-semibold mb-0">{{name}}
+                        </label>
+                        {{! Select field: rendered as a dropdown with one option per configured value. }}
+                        {{#is_select}}
+                        <select id="{{shortname}}" name="{{shortname}}"
+                            class="form-select d-block w-100" aria-label="{{name}}">
+                            <option value="">-- {{#str}}all, moodle{{/str}} --</option>
+                            {{#options}}
+                            <option value="{{index}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                            {{/options}}
+                        </select>
+                        {{/is_select}}
+
+                        {{! Checkbox field: rendered as a yes/no dropdown. }}
+                        {{#is_checkbox}}
+                        <select id="{{shortname}}" name="{{shortname}}"
+                            class="form-select d-block w-100" aria-label="{{name}}">
+                            <option value="">-- {{#str}}all, moodle{{/str}} --</option>
+                            <option value="1" {{#is_yes_selected}}selected{{/is_yes_selected}}>
+                                {{#str}}yes{{/str}}
+                            </option>
+                            <option value="0" {{#is_no_selected}}selected{{/is_no_selected}}>
+                                {{#str}}no{{/str}}
+                            </option>
+                        </select>
+                        {{/is_checkbox}}
+
+                        {{! Number field: rendered as a numeric input. }}
+                        {{#is_number}}
+                        <input type="number"
+                               id="{{shortname}}"
+                               name="{{shortname}}"
+                               class="form-control"
+                               value="{{current_value}}"
+                               placeholder="{{placeholder}}"
+                               aria-label="{{name}}">
+                        {{/is_number}}
+
+                        {{! Textarea field: rendered as a plain text input with autocomplete. }}
+                        {{#is_textarea}}
+                        <input type="text"
+                               id="{{shortname}}"
+                               name="{{shortname}}"
+                               class="form-control"
+                               value="{{current_value}}"
+                               placeholder="{{placeholder}}"
+                               autocomplete="off"
+                               aria-label="{{name}}">
+                        {{/is_textarea}}
+
+                        {{! Text field: rendered as a text input with AJAX autocomplete. }}
+                        {{#is_text}}
+                        <input type="text"
+                               id="{{shortname}}"
+                               name="{{shortname}}"
+                               class="form-control"
+                               data-fieldname="{{shortname}}"
+                               value="{{current_value}}"
+                               placeholder="{{placeholder}}"
+                               autocomplete="off"
+                               aria-label="{{name}}"
+                               role="combobox"
+                               aria-expanded="false"
+                               aria-autocomplete="list">
+                        {{/is_text}}
+
+                    </div>
+                    {{/fields}}
+
+                    {{! Tag filter — shown only if tags are available and not disabled in settings. }}
+                    {{#has_tags}}
+                    <div class="col-12 col-sm-6 col-lg-3 pb-3">
+                        <label class="form-label fw-semibold mb-0">
+                            {{#str}}filtertags, local_catalog_browser{{/str}}
+                        </label>
+                        {{! data-tags: JSON array of all available tags. }}
+                        {{! data-remove-string: localised label for the tag pill remove button. }}
+                        <div id="tag-selector" class="position-relative"
+                            data-tags="{{tags_json}}"
+                            data-remove-string="{{remove_tag_string}}">
+                            <input type="text"
+                                id="tag-search"
+                                class="form-control"
+                                role="combobox"
+                                aria-expanded="false"
+                                aria-controls="tag-dropdown"
+                                aria-autocomplete="list"
+                                data-maxtags="{{maxtags}}"
+                                data-limit-msg="{{limitmsgtags}}"
+                                placeholder="{{#str}}filtertags_placeholder, local_catalog_browser{{/str}}"
+                                autocomplete="off">
+                            {{! Popular tag suggestions — shown below the tag input when no tag is selected yet. }}
+                            {{#has_popular_tags}}
+                            <div id="popular-tags-suggestions" class="mt-1">
+                                <span class="text-muted small me-1">{{populartags_label}}</span>
+                                {{#popular_tags}}
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary me-1 mb-1"
+                                        data-popular-tagid="{{id}}"
+                                        data-popular-tagname="{{rawname}}">
+                                    {{rawname}}
+                                </button>
+                                {{/popular_tags}}
+                            </div>
+                            {{/has_popular_tags}}
+                            {{! Accessible dropdown list populated by the JS tag selector. }}
+                            <ul id="tag-dropdown"
+                                role="listbox"
+                                aria-label="{{#str}}filtertags, local_catalog_browser{{/str}}"
+                                class="list-unstyled position-absolute bg-white border rounded shadow-sm w-100"
+                                style="z-index:1000;display:none;margin:0;padding:0;"></ul>
+                            {{! Container for selected tag pills, managed by JS. }}
+                            <div id="tag-selected" class="d-flex flex-wrap gap-1 mt-1" style="min-height:2em;"></div>
+                        </div>
+                        {{! Hidden inputs for selected tag IDs, injected by JS for form submission. }}
+                        <div id="tag-hidden-inputs"></div>
+                    </div>
+                    {{/has_tags}}
+
+                </div>
+
+                {{! Form action buttons: reset clears all filters, submit runs the search. }}
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <a href="{{{search_url}}}" class="btn btn-outline-secondary">
+                        {{#str}}reset, moodle{{/str}}
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        {{#str}}search, local_catalog_browser{{/str}}
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+    {{! Sort bar: highlights the active sort button. JS updates these classes dynamically. }}
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="text-muted">{{#str}}sortby, local_catalog_browser{{/str}}</span>
+        <a href="{{{sorturl_az}}}"
+           class="btn ms-2 {{#sort_az}}btn-secondary{{/sort_az}}{{^sort_az}}btn-outline-secondary{{/sort_az}}">
+            {{#str}}sort_az, local_catalog_browser{{/str}}
+        </a>
+        <a href="{{{sorturl_recent}}}"
+           class="btn {{#sort_recent}}btn-secondary{{/sort_recent}}{{^sort_recent}}btn-outline-secondary{{/sort_recent}}">
+            {{#str}}sort_recent, local_catalog_browser{{/str}}
+        </a>
+        <a href="{{{sorturl_moodle}}}"
+           class="btn {{#sort_moodle}}btn-secondary{{/sort_moodle}}{{^sort_moodle}}btn-outline-secondary{{/sort_moodle}}">
+            {{#str}}sort_oldest, local_catalog_browser{{/str}}
+        </a>
+    </div>
+
+    {{! Results container. aria-live="polite" announces updates to screen readers. }}
+    {{! data-* attributes inject localised strings and config values used by the JS module. }}
+    <div id="catalog-results" aria-live="polite" aria-atomic="true"
+        class="mx-auto" style="max-width:900px;"
+        data-perpage="{{perpage}}"
+        data-results-string="{{results_dynamic_string}}"
+        data-noresults-string="{{noresults_string}}">
+
+        {{! Result count line. }}
+        <p class="text-muted">
+            {{#str}}results, local_catalog_browser, {{results_count}}{{/str}}
+        </p>
+
+        {{! Course cards list — one card per result. }}
+        {{#has_courses}}
+        <div class="list-group mb-3">
+            {{#courses}}
+            <div class="list-group-item list-group-item-action p-3 h-auto">
+                <div class="d-flex align-items-start">
+
+                    {{! Course overview image if available. }}
+                    {{#imgurl}}
+                    <div class="flex-shrink-0 rounded overflow-hidden" style="width:140px;height:105px;">
+                        <img src="{{imgurl}}" alt="{{fullname}}"
+                            style="width:100%;height:100%;object-fit:cover;display:block;">
+                    </div>
+                    {{/imgurl}}
+
+                    {{! Fallback placeholder icon when no overview image is set. }}
+                    {{^imgurl}}
+                    <div class="rounded flex-shrink-0 bg-light d-flex align-items-center justify-content-center"
+                        style="width:140px;height:105px;" role="presentation">
+                        <i class="fa fa-graduation-cap text-muted fa-2x"></i>
+                    </div>
+                    {{/imgurl}}
+
+                    <div class="flex-grow-1" style="padding-left:1.5rem;">
+                        {{! Course title. }}
+                        <a href="{{url}}" class="h4 mb-1 d-block text-decoration-none">{{fullname}}</a>
+                        {{! Tag badges associated with the course. }}
+                        <div class="mb-2" aria-label="{{#str}}filtertags, local_catalog_browser{{/str}}">
+                            {{#tags}}
+                            <span class="badge bg-secondary me-1" style="font-size:0.85rem;">{{name}}</span>
+                            {{/tags}}
+                        </div>
+                        {{! Truncated plain-text course summary. }}
+                        <p class="mb-0" style="font-size:0.95rem;">{{summary}}</p>
+                    </div>
+
+                </div>
+            </div>
+            {{/courses}}
+        </div>
+        {{/has_courses}}
+
+        {{! No results message — shown when filters return an empty set. }}
+        {{#no_results}}
+        <div class="alert alert-info">
+            {{#str}}noresults, local_catalog_browser{{/str}}
+        </div>
+        {{/no_results}}
+
+        {{! Pagination nav — shown only when there is more than one page of results. }}
+        {{#has_pagination}}
+        <nav aria-label="{{#str}}pagination, moodle{{/str}}">
+            <ul class="pagination">
+                {{#pagination}}
+                <li class="page-item {{#active}}active{{/active}}">
+                    <a class="page-link" href="{{{url}}}"
+                       {{#active}}aria-current="page"{{/active}}>{{num}}</a>
+                </li>
+                {{/pagination}}
+            </ul>
+        </nav>
+        {{/has_pagination}}
+
+    </div>
+
+</div>

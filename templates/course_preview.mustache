@@ -1,0 +1,118 @@
+{{!
+    Course preview page template for the catalog_browser plugin.
+    Displays course title, overview image, full description, and tags.
+    Shows a login prompt for unauthenticated users.
+    Authenticated users are redirected directly to the course by course.php.
+
+    @template local_catalog_browser/course_preview
+
+    @param {string} fullname - Course full name.
+    @param {string} imgurl - Course overview image URL, empty if none.
+    @param {string} description - Full course description rendered as HTML.
+    @param {bool} has_tags - Whether the course has tags.
+    @param {Array} tags - Tag badges associated with the course.
+    @param {bool} is_guest - Whether the current user is a guest.
+    @param {string} return_url - URL to return to the catalog with filters preserved.
+    @param {string} login_url - URL to the Moodle login page.
+
+    @package    local_catalog_browser
+    @copyright  2026 Marie Di Palma
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    Example context (json):
+    {
+        "fullname": "Example course",
+        "imgurl": "",
+        "description": "Full course description here.",
+        "has_tags": true,
+        "tags": [
+            {"name": "PHP"},
+            {"name": "Moodle"}
+        ],
+        "is_guest": false,
+        "return_url": "http://example.com/local/catalog_browser/index.php",
+        "login_url": "http://example.com/login/index.php"
+    }
+}}
+
+<div class="container-fluid px-0">
+
+    {{! Back-to-catalog button — returns to the exact filtered and paginated state the user came from.
+        Falls back to the catalog index if no return URL was provided. }}
+    <div class="mb-4">
+        <a href="{{{return_url}}}"
+        class="btn btn-outline-secondary"
+        aria-label="{{#str}}backtocatalog, local_catalog_browser{{/str}}">
+            <i class="fa fa-arrow-left me-1" aria-hidden="true"></i>
+            {{#str}}backtocatalog, local_catalog_browser{{/str}}
+        </a>
+    </div>
+
+    {{! Course card — image left, content right, matching the catalog result card layout. }}
+    <div class="card mx-auto" style="max-width:900px;">
+        <div class="card-body">
+            <div class="d-flex align-items-start">
+
+                {{! Course overview image — wider than the catalog card but still contained. }}
+                {{#imgurl}}
+                <div class="flex-shrink-0 rounded overflow-hidden" style="width:220px;height:165px;">
+                    <img src="{{imgurl}}"
+                         alt=""
+                         style="width:100%;height:100%;object-fit:cover;display:block;">
+                </div>
+                {{/imgurl}}
+
+                {{! Fallback placeholder when no overview image is set. }}
+                {{^imgurl}}
+                <div class="rounded flex-shrink-0 bg-light d-flex align-items-center justify-content-center"
+                     style="width:220px;height:165px;"
+                     role="presentation"
+                     aria-hidden="true">
+                    <i class="fa fa-graduation-cap text-muted fa-2x" aria-hidden="true"></i>
+                </div>
+                {{/imgurl}}
+
+                <div class="flex-grow-1" style="padding-left:1.5rem;">
+
+                    <h1 class="h4 mb-2">{{fullname}}</h1>
+
+                    {{! Tag badges. }}
+                    {{#has_tags}}
+                    <div class="mb-2"
+                         aria-label="{{#str}}filtertags, local_catalog_browser{{/str}}">
+                        {{#tags}}
+                        <span class="badge bg-secondary me-1"
+                              style="font-size:0.85rem;">{{name}}</span>
+                        {{/tags}}
+                    </div>
+                    {{/has_tags}}
+
+                    {{! Full course description — rendered HTML from format_text(). }}
+                    <div class="mb-0">
+                        {{{description}}}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{! Login notice — displayed below the course card, outside of it. }}
+    {{#is_guest}}
+    <div class="mx-auto mt-4" style="max-width:900px;">
+        <div class="alert d-flex align-items-center gap-3"
+             style="background-color:#e6f4f4;border-color:#5bc0c0;"
+             role="alert">
+            <div>
+                <p class="mb-2">{{#str}}preview_loginnotice, local_catalog_browser{{/str}}</p>
+                <a href="{{{login_url}}}"
+                   class="btn btn-primary btn-sm"
+                   aria-label="{{#str}}preview_loginbutton, local_catalog_browser{{/str}}">
+                    {{#str}}preview_loginbutton, local_catalog_browser{{/str}}
+                </a>
+            </div>
+        </div>
+    </div>
+    {{/is_guest}}
+
+</div>
