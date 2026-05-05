@@ -13,8 +13,8 @@ All notable changes to local_catalog_browser will be documented in this file.
 - Sort results by alphabetical order (A→Z), most recently created, or default Moodle order
 - Paginated results with configurable page size
 - Course cards displaying overview image, tags, and truncated summary
-- Course preview page for unauthenticated users, with full description, tags, and back-to-catalog navigation preserving filters and pagination state
-- Authenticated users are redirected directly to the Moodle course page — enrolment handled natively by Moodle
+- Course preview page for non-logged-in users when guest access is enabled, with full description, tags, and back-to-catalog navigation preserving filters and pagination state
+- Authenticated users are redirected directly to the course page if enrolled, or to the Moodle enrolment page if not — access and enrolment handled natively by Moodle
 - Reset button to clear all active filters
 - Keyboard navigation in all autocomplete dropdowns (arrow keys, Enter, Escape)
 - Autocomplete suggestions limited to 10 results per query
@@ -24,5 +24,5 @@ All notable changes to local_catalog_browser will be documented in this file.
 - Plugin settings: custom field category selector, title/category/tag filter toggles, configurable tag selection limit (1–25), results per page, guest access toggle
 - Guest access toggle automatically syncs the guest role capability at system context
 - Catalog page URL displayed in plugin settings for easy access and sharing
-- English and French language strings
+- English language strings included (French translation will be available via AMOS)
 - Capability `local/catalog_browser:view` with default access for all authenticated user roles
