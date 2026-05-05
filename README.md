@@ -5,26 +5,30 @@
 ![License](https://img.shields.io/badge/License-GPL%20v3-green?logo=gnu)
 ![Version](https://img.shields.io/badge/Version-1.0.0-blue)
 
+![Catalog overview](pix/screenshots/catalog_overview.png)
+
 A Moodle local plugin providing a browsable and filterable course catalog. Users can search for courses using custom field values, course title, native Moodle tags, and course category — all from a single page, with results updating dynamically without page reload.
 
 ## Features
 
+- Optional guest access (non-logged-in users can be allowed to browse the catalog)
 - Filter courses by custom field values (text, select, checkbox, number, textarea)
 - Filter courses by course title with AJAX autocomplete suggestions (optional)
 - Filter courses by native Moodle tags with a pill-based selector and inline autocomplete (optional, configurable)
-- Filter courses by Moodle course category (optional, configurable)
+- Filter courses by Moodle course category (optional)
 - Dynamic AJAX search: results update without page reload as filters change
 - Sort results alphabetically (A→Z), by most recently created, or by default Moodle order (oldest first)
 - Paginated results with configurable page size
 - Course cards display the overview image, course title, tags, and a truncated summary from the course description
-- Course preview page for unauthenticated users, with full description, tags, and back-to-catalog navigation
+- Course preview page for non-logged-in users when guest access is enabled, with full description, tags, and back-to-catalog navigation
 - Only visible courses are returned in search results
 - Custom fields with visibility set to "Nobody" are automatically excluded from filters
 - Placeholder text generated from the custom field description, with fallback to the field name
 - Keyboard navigation in all autocomplete dropdowns (arrow keys, Enter, Escape)
 - Reset button to clear all active filters
-- Optional guest access (non-logged-in users can be allowed to browse the catalog)
 - English and French language strings included
+
+![Catalog with active filters — category, tag, and language autocomplete](pix/screenshots/catalog_filtered.png)
 
 ## Supported Field Types
 
@@ -40,8 +44,8 @@ A Moodle local plugin providing a browsable and filterable course catalog. Users
 
 ## Requirements
 
-- Moodle 4.2 or higher
-- PHP 8.0 or higher
+- Moodle 4.3 or higher
+- PHP 8.3 or higher
 - At least one custom field category configured under Site administration → Courses → Course custom fields
 
 ## Installation
@@ -79,6 +83,8 @@ After installation, go to **Site administration → Plugins → Local plugins �
 | Results per page | Number of course results displayed per page | 10 |
 | Allow guest access | Allow non-logged-in users to access the catalog | No |
 
+![Plugin settings page in Moodle admin](pix/screenshots/admin_settings.png)
+
 ## Usage
 
 The catalog URL is available directly in the plugin settings page under **Site administration → Plugins → Local plugins → Catalog Browser**.
@@ -89,9 +95,16 @@ The catalog filters are driven by Moodle course custom fields. To set them up:
 
 1. Go to **Site administration → Courses → Course custom fields** and create a custom field category (e.g. "Catalog filters").
 2. Add fields to that category. Each field will appear as a filter on the catalog page, in the order defined here.
-3. In the plugin settings, select that category under **Category**.
-4. To exclude a field from the catalog without deleting it, set its **Visibility** to **Nobody** — the plugin will skip it automatically.
-5. The placeholder text shown inside each filter input is taken from the field's **Description**. If no description is set, the field name is used as a fallback.
+
+![Custom field category configuration in Moodle](pix/screenshots/custom_fields_category.png)
+
+3. Fill in the custom field values for each course under Course settings → Course details (or whichever name you gave your category)
+
+![Custom field values on a course edit page](pix/screenshots/course_settings.png)
+
+4. In the plugin settings, select the category under **Category**.
+5. To exclude a field from the catalog without deleting it, set its **Visibility** to **Nobody** — the plugin will skip it automatically.
+6. The placeholder text shown inside each filter input is taken from the field's **Description**. If no description is set, the field name is used as a fallback.
 
 Only fields of a supported type (text, textarea, select, checkbox, number) are shown. Fields of other types, including date fields, are silently ignored. If no category is selected or the selected category contains no eligible fields, the custom field filter section simply does not appear on the catalog page.
 
@@ -110,7 +123,7 @@ This layout is intentional: title and category provide broad, immediate narrowin
 - **Category**: select a Moodle course category from the dropdown
 - **Custom fields**: fill in or select values for any of the available filters
 - **Tags**: type part of a tag name to see matching suggestions, then click to add it as a pill — click × on a pill to remove it
-- Results update dynamically as filters change — no need to click Search for most filter types
+- Results update automatically as filters change — select, category, tag, and number filters update immediately; text inputs update on blur or when a suggestion is selected.
 - Click **Search** to apply the active filters explicitly, or press **Enter** in any text input (title or custom field filters) to trigger the same update immediately
 - Click **Reset** to clear all active filters and return to the default view
 
@@ -124,14 +137,15 @@ Three sort options are available via the sort bar above the results:
 | Most recent | Most recently created courses first |
 | Oldest first | Default Moodle database order |
 
-### Course preview page
+### Course preview page (guest access)
 
-The course preview page displays the course title, overview image, full description, and tags, along with a back-to-catalog button that preserves the active filters and pagination state.
+The course preview page is only shown when guest access is enabled in the plugin settings. It displays the course title, overview image, full description, and tags, along with a back-to-catalog button that preserves the active filters and pagination state.
 
-The purpose of this page is to let administrators control what information is visible before authentication. Users can read a course description and decide whether to enrol without being exposed to any course content. This is particularly relevant when guest access is enabled.
+Its purpose is to let non-logged-in users read the course description before deciding whether to log in and enrol, without being exposed to any course content. The page includes a login prompt to guide them toward authentication.
 
-- If the user is authenticated, they are redirected directly to `course/view.php` — Moodle handles access and enrolment natively from there.
-- If the user is not logged in, the preview page is shown with a login prompt.
+If the user is authenticated and enrolled, they are redirected directly to course/view.php. If the user is authenticated but not enrolled, Moodle redirects them to the course enrolment page. In both cases, Moodle handles access and enrolment natively.
+
+![Course preview page for unauthenticated users](pix/screenshots/course_preview_guest.png)
 
 ### Notes on search behaviour
 
@@ -181,8 +195,7 @@ Autocomplete requires at least 2 characters to be typed. If suggestions still do
 Dynamic search requires JavaScript. Ensure JavaScript is enabled in the browser and that Moodle caches have been purged after any update to the plugin files.
 
 ## Author
-Marie Di Palma
-Developed with AI assistance (Claude by Anthropic).
+Marie Di Palma - Developed with AI assistance (Claude by Anthropic).
 
 ## License
 
