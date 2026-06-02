@@ -159,13 +159,57 @@ if ($showtagfilter && $showpopulartags && empty($selectedtags)) {
     }
 }
 
-// Build the field data array for the template.
-// Each entry contains type flags, current value, placeholder, and options (for select fields).
-$fields = [];
+// Build the unified filter array for the template.
+// Native filters (title, category, tags) are inserted at their configured positions.
+// Custom fields fill the remaining slots in their natural category order.
+// Conflicts between native filters are resolved by priority: title > category > tags.
+
+// Read configured positions for native filters (0 or negative = last position).
+$order_title    = (int)get_config('local_catalog_browser', 'order_titlefilter')    ?: 1;
+$order_category = (int)get_config('local_catalog_browser', 'order_categoryfilter') ?: 2;
+$order_tag      = (int)get_config('local_catalog_browser', 'order_tagfilter')      ?: 3;
+
+// Build the list of active native filters with their requested positions.
+// Only include filters that are enabled in settings.
+$nativefilters = [];
+if ($showtitlefilter) {
+    $nativefilters[] = ['pos' => $order_title,    'priority' => 0, 'type' => 'title'];
+}
+if ($showcategoryfilter) {
+    $nativefilters[] = ['pos' => $order_category, 'priority' => 1, 'type' => 'category'];
+}
+if ($showtagfilter && !empty($tagsdata)) {
+    $nativefilters[] = ['pos' => $order_tag,      'priority' => 2, 'type' => 'tags'];
+}
+
+// Count total active filters (natives + custom fields).
+$totalfilters = count($nativefilters) + count($customfields);
+
+// Normalise positions: values <= 0 or exceeding total become last (PHP_INT_MAX as sentinel).
+foreach ($nativefilters as &$nf) {
+    if ($nf['pos'] <= 0 || $nf['pos'] > $totalfilters) {
+        $nf['pos'] = PHP_INT_MAX;
+    }
+}
+unset($nf);
+
+// Resolve conflicts: if two native filters share the same position,
+// the one with lower priority value wins and the other is pushed one step further.
+// Sort by position first, then by priority to process them in the right order.
+usort($nativefilters, function($a, $b) {
+    return $a['pos'] !== $b['pos'] ? $a['pos'] - $b['pos'] : $a['priority'] - $b['priority'];
+});
+
+// Index native filters by their final resolved position (1-based).
+$nativebypos = [];
+foreach ($nativefilters as $nf) {
+    $nativebypos[$nf['pos']] = $nf['type'];
+}
+
+// Build the custom field entries (same structure as before).
+$customfieldentries = [];
 foreach ($customfields as $field) {
     $currentvalue = $filters[$field->shortname] ?? '';
-
-    // Use the field description as placeholder text, falling back to the field name.
     $description = format_text(
         $field->description,
         $field->descriptionformat,
@@ -173,38 +217,35 @@ foreach ($customfields as $field) {
     );
     $description = trim(strip_tags($description));
     $placeholder = !empty($description) ? $description : $field->name;
-
-    // Truncate long placeholders to keep the UI clean.
     if (strlen($placeholder) > 30) {
         $placeholder = substr($placeholder, 0, 27) . '...';
     }
-
     $fielddata = [
         'shortname'       => $field->shortname,
         'name'            => $field->name,
         'placeholder'     => $placeholder,
         'current_value'   => $currentvalue,
-        'is_select'       => $field->type === 'select',   // Rendered as a dropdown.
-        'is_checkbox'     => $field->type === 'checkbox', // Rendered as a yes/no dropdown.
-        'is_number'       => $field->type === 'number',   // Rendered as a number input.
-        'is_textarea'     => $field->type === 'textarea', // Rendered as a plain text input.
-        'is_text'         => $field->type === 'text',     // Rendered as a text input with autocomplete.
-        'is_yes_selected' => ($currentvalue === '1'),     // Pre-selects "Yes" for checkbox fields.
-        'is_no_selected'  => ($currentvalue === '0'),     // Pre-selects "No" for checkbox fields.
+        'is_title'        => false,
+        'is_category'     => false,
+        'is_tags'         => false,
+        'is_select'       => $field->type === 'select',
+        'is_checkbox'     => $field->type === 'checkbox',
+        'is_number'       => $field->type === 'number',
+        'is_textarea'     => $field->type === 'textarea',
+        'is_text'         => $field->type === 'text',
+        'is_yes_selected' => ($currentvalue === '1'),
+        'is_no_selected'  => ($currentvalue === '0'),
     ];
-
-    // For select fields, parse the newline-separated options from configdata.
     if ($field->type === 'select') {
         $config  = json_decode($field->configdata, true);
         $options = [];
         if (!empty($config['options'])) {
-            $raw = array_filter(array_map('trim', preg_split('/\\r\\n|\\r|\\n/', $config['options'])));
+            $raw = array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $config['options'])));
             $idx = 1;
             foreach ($raw as $opt) {
                 $options[] = [
                     'index'    => $idx,
                     'label'    => $opt,
-                    // Pre-select the option matching the current filter value.
                     'selected' => ((string)$currentvalue === (string)$idx),
                 ];
                 $idx++;
@@ -212,8 +253,85 @@ foreach ($customfields as $field) {
         }
         $fielddata['options'] = $options;
     }
+    $customfieldentries[] = $fielddata;
+}
 
-    $fields[] = $fielddata;
+// Interleave native filters and custom fields into the final ordered $fields array.
+// Walk positions 1..N, inserting the native filter when its slot is reached,
+// otherwise consuming the next custom field.
+$fields = [];
+$customindex = 0;
+for ($pos = 1; $pos <= $totalfilters; $pos++) {
+    if (isset($nativebypos[$pos])) {
+        $type = $nativebypos[$pos];
+        $fields[] = [
+            'is_title'        => $type === 'title',
+            'is_category'     => $type === 'category',
+            'is_tags'         => $type === 'tags',
+            'is_select'       => false,
+            'is_checkbox'     => false,
+            'is_number'       => false,
+            'is_textarea'     => false,
+            'is_text'         => false,
+            // Native-specific data passed through for the mustache blocks.
+            'filtertitle'         => $filtertitle,
+            'categories'          => $categoriesdata,
+            'selected_category'   => $selectedcategory,
+            'tags_json'           => json_encode(array_values($tagsdata)),
+            'maxtags'             => $maxtagselection,
+            'limitmsgtags'        => get_string('filtertags_limit', 'local_catalog_browser', $maxtagselection),
+            'popular_tags'        => $populartagsdata,
+            'has_popular_tags'    => !empty($populartagsdata),
+            'populartags_label'   => get_string('populartags_label', 'local_catalog_browser'),
+            'remove_tag_string'   => get_string('removetag', 'local_catalog_browser'),
+        ];
+    } else if ($customindex < count($customfieldentries)) {
+        $fields[] = $customfieldentries[$customindex];
+        $customindex++;
+    }
+}
+// Append any remaining custom fields if all native slots were placed before the end.
+while ($customindex < count($customfieldentries)) {
+    $fields[] = $customfieldentries[$customindex];
+    $customindex++;
+}
+
+// Append any native filters whose position exceeded the total (sentinel PHP_INT_MAX).
+foreach ($nativefilters as $nf) {
+    $placed = false;
+    foreach ($fields as $f) {
+        if (
+            ($nf['type'] === 'title'    && !empty($f['is_title'])) ||
+            ($nf['type'] === 'category' && !empty($f['is_category'])) ||
+            ($nf['type'] === 'tags'     && !empty($f['is_tags']))
+        ) {
+            $placed = true;
+            break;
+        }
+    }
+    if (!$placed) {
+        $type = $nf['type'];
+        $fields[] = [
+            'is_title'          => $type === 'title',
+            'is_category'       => $type === 'category',
+            'is_tags'           => $type === 'tags',
+            'is_select'         => false,
+            'is_checkbox'       => false,
+            'is_number'         => false,
+            'is_textarea'       => false,
+            'is_text'           => false,
+            'filtertitle'       => $filtertitle,
+            'categories'        => $categoriesdata,
+            'selected_category' => $selectedcategory,
+            'tags_json'         => json_encode(array_values($tagsdata)),
+            'maxtags'           => $maxtagselection,
+            'limitmsgtags'      => get_string('filtertags_limit', 'local_catalog_browser', $maxtagselection),
+            'popular_tags'      => $populartagsdata,
+            'has_popular_tags'  => !empty($populartagsdata),
+            'populartags_label' => get_string('populartags_label', 'local_catalog_browser'),
+            'remove_tag_string' => get_string('removetag', 'local_catalog_browser'),
+        ];
+    }
 }
 
 // Build the course card data array for the current page.
@@ -341,25 +459,6 @@ $templatedata = [
     // Filter form fields.
     'fields'               => $fields,                  // Custom field filter inputs.
     'filtertitle'          => $filtertitle,              // Current course title filter value.
-
-    // Tag filter.
-    'tags'                 => $tagsdata,                 // All available tags with checked state.
-    'has_tags'             => $showtagfilter && !empty($tagsdata), // Whether to show the tag filter.
-    'maxtags'              => $maxtagselection,          // Maximum number of selectable tags.
-    // Message shown when limit is reached.
-    'limitmsgtags'         => get_string('filtertags_limit', 'local_catalog_browser', $maxtagselection),
-    'tags_json'            => json_encode(array_values($tagsdata)), // JSON for JS tag selector.
-    'popular_tags'         => $populartagsdata,               // Popular tag suggestions.
-    'has_popular_tags'     => !empty($populartagsdata),       // Whether to show the suggestions block.
-    'populartags_label'    => get_string('populartags_label', 'local_catalog_browser'),
-
-    // Title filter.
-    'show_title_filter'    => $showtitlefilter,           // Whether to show the course title filter.
-
-    // Category filter.
-    'has_category_filter'  => $showcategoryfilter,       // Whether to show the category filter.
-    'categories'           => $categoriesdata,           // List of categories for the dropdown.
-    'selected_category'    => $selectedcategory,         // Currently selected category ID.
 
     // Course results.
     'results_count'        => $totalcount,               // Total number of matching courses.

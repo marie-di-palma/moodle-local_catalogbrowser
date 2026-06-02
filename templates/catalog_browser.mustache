@@ -88,45 +88,6 @@
         <div class="card mb-4">
             <div class="card-body">
                 <div class="row g-5">
-
-                    {{! Course title text filter — shown only if enabled in plugin settings. }}
-                    {{#show_title_filter}}
-                    <div class="col-12 col-sm-6 col-lg-3 pb-3">
-                        <label for="coursetitle" class="form-label fw-semibold mb-0">
-                            {{#str}}filtertitle, local_catalog_browser{{/str}}
-                        </label>
-                        <input type="text"
-                            id="coursetitle"
-                            name="coursetitle"
-                            class="form-control"
-                            data-fieldname="coursetitle"
-                            value="{{filtertitle}}"
-                            placeholder="{{#str}}filtertitle_placeholder, local_catalog_browser{{/str}}"
-                            autocomplete="off"
-                            aria-label="{{#str}}filtertitle, local_catalog_browser{{/str}}"
-                            role="combobox"
-                            aria-expanded="false"
-                            aria-autocomplete="list">
-                    </div>
-                    {{/show_title_filter}}
-
-                    {{! Moodle course category filter — shown only if enabled in plugin settings. }}
-                    {{#has_category_filter}}
-                    <div class="col-12 col-sm-6 col-lg-3 pb-3">
-                        <label for="categoryid" class="form-label fw-semibold mb-0">
-                            {{#str}}filtercategory, local_catalog_browser{{/str}}
-                        </label>
-                        <select id="categoryid" name="categoryid"
-                            class="form-select d-block w-100"
-                            aria-label="{{#str}}filtercategory, local_catalog_browser{{/str}}">
-                            <option value="0">{{#str}}filtercategory_all, local_catalog_browser{{/str}}</option>
-                            {{#categories}}
-                            <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
-                            {{/categories}}
-                        </select>
-                    </div>
-                    {{/has_category_filter}}
-
                     {{! Custom field filters — one column per field, rendered by type. }}
                     {{#fields}}
                     <div class="col-12 col-sm-6 col-lg-3 pb-3">
@@ -195,18 +156,45 @@
                                aria-expanded="false"
                                aria-autocomplete="list">
                         {{/is_text}}
+                        {{! Native title filter. }}
+                        {{#is_title}}
+                        <label for="coursetitle" class="form-label fw-semibold mb-0">
+                            {{#str}}filtertitle, local_catalog_browser{{/str}}
+                        </label>
+                        <input type="text"
+                            id="coursetitle"
+                            name="coursetitle"
+                            class="form-control"
+                            data-fieldname="coursetitle"
+                            value="{{filtertitle}}"
+                            placeholder="{{#str}}filtertitle_placeholder, local_catalog_browser{{/str}}"
+                            autocomplete="off"
+                            aria-label="{{#str}}filtertitle, local_catalog_browser{{/str}}"
+                            role="combobox"
+                            aria-expanded="false"
+                            aria-autocomplete="list">
+                        {{/is_title}}
 
-                    </div>
-                    {{/fields}}
+                        {{! Native category filter. }}
+                        {{#is_category}}
+                        <label for="categoryid" class="form-label fw-semibold mb-0">
+                            {{#str}}filtercategory, local_catalog_browser{{/str}}
+                        </label>
+                        <select id="categoryid" name="categoryid"
+                            class="form-select d-block w-100"
+                            aria-label="{{#str}}filtercategory, local_catalog_browser{{/str}}">
+                            <option value="0">{{#str}}filtercategory_all, local_catalog_browser{{/str}}</option>
+                            {{#categories}}
+                            <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+                            {{/categories}}
+                        </select>
+                        {{/is_category}}
 
-                    {{! Tag filter — shown only if tags are available and not disabled in settings. }}
-                    {{#has_tags}}
-                    <div class="col-12 col-sm-6 col-lg-3 pb-3">
+                        {{! Native tag filter. }}
+                        {{#is_tags}}
                         <label class="form-label fw-semibold mb-0">
                             {{#str}}filtertags, local_catalog_browser{{/str}}
                         </label>
-                        {{! data-tags: JSON array of all available tags. }}
-                        {{! data-remove-string: localised label for the tag pill remove button. }}
                         <div id="tag-selector" class="position-relative"
                             data-tags="{{tags_json}}"
                             data-remove-string="{{remove_tag_string}}">
@@ -221,7 +209,6 @@
                                 data-limit-msg="{{limitmsgtags}}"
                                 placeholder="{{#str}}filtertags_placeholder, local_catalog_browser{{/str}}"
                                 autocomplete="off">
-                            {{! Popular tag suggestions — shown below the tag input when no tag is selected yet. }}
                             {{#has_popular_tags}}
                             <div id="popular-tags-suggestions" class="mt-1">
                                 <span class="text-muted small me-1">{{populartags_label}}</span>
@@ -235,20 +222,17 @@
                                 {{/popular_tags}}
                             </div>
                             {{/has_popular_tags}}
-                            {{! Accessible dropdown list populated by the JS tag selector. }}
                             <ul id="tag-dropdown"
                                 role="listbox"
                                 aria-label="{{#str}}filtertags, local_catalog_browser{{/str}}"
                                 class="list-unstyled position-absolute bg-white border rounded shadow-sm w-100"
                                 style="z-index:1000;display:none;margin:0;padding:0;"></ul>
-                            {{! Container for selected tag pills, managed by JS. }}
                             <div id="tag-selected" class="d-flex flex-wrap gap-1 mt-1" style="min-height:2em;"></div>
                         </div>
-                        {{! Hidden inputs for selected tag IDs, injected by JS for form submission. }}
                         <div id="tag-hidden-inputs"></div>
+                        {{/is_tags}}
                     </div>
-                    {{/has_tags}}
-
+                    {{/fields}}
                 </div>
 
                 {{! Form action buttons: reset clears all filters, submit runs the search. }}

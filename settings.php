@@ -93,12 +93,34 @@ if ($hassiteconfig) {
         1
     ));
 
+    // Title filter order positions — 1 = first, 2 = second, etc. -1 or any value exceeding
+    // the total number of active filters forces the field to last position.
+    // In case of conflict between native filters, title wins over category, which wins over tags.
+    $settings->add(new admin_setting_configtext(
+        'local_catalog_browser/order_titlefilter',
+        get_string('setting_order_titlefilter', 'local_catalog_browser'),
+        get_string('setting_order_titlefilter_desc', 'local_catalog_browser'),
+        '1',
+        PARAM_INT
+    ));
+
     // Show or hide the Moodle course category filter (default: enabled).
     $settings->add(new admin_setting_configcheckbox(
         'local_catalog_browser/showcategoryfilter',
         get_string('setting_showcategoryfilter', 'local_catalog_browser'),
         get_string('setting_showcategoryfilter_desc', 'local_catalog_browser'),
         1
+    ));
+
+    // Category filter order positions — 1 = first, 2 = second, etc. -1 or any value exceeding
+    // the total number of active filters forces the field to last position.
+    // In case of conflict between native filters, title wins over category, which wins over tags.
+    $settings->add(new admin_setting_configtext(
+        'local_catalog_browser/order_categoryfilter',
+        get_string('setting_order_categoryfilter', 'local_catalog_browser'),
+        get_string('setting_order_categoryfilter_desc', 'local_catalog_browser'),
+        '2',
+        PARAM_INT
     ));
 
     // Show or hide the tag filter (default: enabled).
@@ -108,6 +130,33 @@ if ($hassiteconfig) {
         get_string('setting_showtagfilter_desc', 'local_catalog_browser'),
         1
     ));
+
+    // Tag filter order positions — 1 = first, 2 = second, etc. -1 or any value exceeding
+    // the total number of active filters forces the field to last position.
+    // In case of conflict between native filters, title wins over category, which wins over tags.
+    $settings->add(new admin_setting_configtext(
+        'local_catalog_browser/order_tagfilter',
+        get_string('setting_order_tagfilter', 'local_catalog_browser'),
+        get_string('setting_order_tagfilter_desc', 'local_catalog_browser'),
+        '3',
+        PARAM_INT
+    ));
+
+    // Warn the admin if two or more native filters share the same configured position.
+    $order_title    = (int)get_config('local_catalog_browser', 'order_titlefilter')    ?: 1;
+    $order_category = (int)get_config('local_catalog_browser', 'order_categoryfilter') ?: 2;
+    $order_tag      = (int)get_config('local_catalog_browser', 'order_tagfilter')      ?: 3;
+    $positions = [$order_title, $order_category, $order_tag];
+    if (count($positions) !== count(array_unique($positions))) {
+        $settings->add(new admin_setting_description(
+            'local_catalog_browser/order_conflict_warning',
+            '',
+            html_writer::tag('div',
+                get_string('setting_order_conflict', 'local_catalog_browser'),
+                ['class' => 'alert alert-warning']
+            )
+        ));
+    }
 
     // Maximum number of tags selectable at once (between 1 and 25, default: 3).
     // Has no effect if the tag filter is disabled.
