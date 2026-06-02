@@ -26,3 +26,12 @@ All notable changes to local_catalog_browser will be documented in this file.
 - Catalog page URL displayed in plugin settings for easy access and sharing
 - English language strings included (French translation will be available via AMOS)
 - Capability `local/catalog_browser:view` with default access for all authenticated user roles
+
+
+## [1.0.1] - 2026-06-02
+
+### Added
+
+- Configurable display order for native filters (course title, category, tags) via admin settings.
+- Conflict resolution when two native filters share the same position (title before category, category before tags).
+- Warning displayed in admin settings when a position conflict is detected.

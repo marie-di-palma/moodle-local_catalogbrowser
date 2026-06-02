@@ -33,7 +33,7 @@ $plugin->component = 'local_catalog_browser';
 // Plugin version number in YYYYMMDDXX format (year, month, day, two-digit increment).
 // Moodle compares this against the version stored in the database to detect updates.
 // Incrementing this number will trigger an upgrade prompt in Moodle.
-$plugin->version = 2026022506;
+$plugin->version = 2026060201;
 
 // Minimum Moodle version required to run this plugin (Moodle 4.3).
 // The core_external namespace used by this plugin was introduced in Moodle 4.2.
@@ -42,7 +42,7 @@ $plugin->version = 2026022506;
 $plugin->requires = 2023100900;
 
 // Human-readable version label — for display purposes only, no technical effect.
-$plugin->release = '1.0';
+$plugin->release = '1.0.1';
 
 // Maturity level of this release.
 // MATURITY_ALPHA = under active development, not recommended for production.

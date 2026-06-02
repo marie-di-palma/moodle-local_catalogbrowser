@@ -3,7 +3,7 @@
 ![Moodle](https://img.shields.io/badge/Moodle-4.3+-orange?logo=moodle)
 ![PHP](https://img.shields.io/badge/PHP-8.3+-777BB4?logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/License-GPL%20v3-green?logo=gnu)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue)
+![Version](https://img.shields.io/badge/Version-1.0.1-blue)
 
 ![Catalog overview](pix/screenshots/catalog_overview.png)
 
@@ -75,8 +75,11 @@ After installation, go to **Site administration → Plugins → Local plugins �
 |---|---|---|
 | Category | Custom field category whose fields will be used as filters | — |
 | Show title filter | Show a course title search input on the catalog page | Yes |
+| Course title filter position | Display position of the course title filter (1 = first, -1 or any value exceeding the total = last) | 1 |
 | Show category filter | Show a Moodle course category filter on the catalog page | Yes |
+| Category filter position | Display position of the category filter | 2 |
 | Show tag filter | Show the tag filter on the catalog page | Yes |
+| Tag filter position | Display position of the tag filter | 3 |
 | Maximum selectable tags | Maximum number of tags a user can select at once (1–25). Has no effect if the tag filter is disabled. | 3 |
 | Show popular tag suggestions | Display the most-used tags as clickable suggestions below the tag search input, when no tag has been selected | Yes |
 | Number of popular tags to display | Number of popular tag suggestions shown. Has no effect if popular tag suggestions or the tag filter are disabled | 3 |
@@ -110,14 +113,7 @@ Only fields of a supported type (text, textarea, select, checkbox, number) are s
 
 ### Filtering courses
 
-Filters are presented in the following fixed order on the catalog page:
-
-1. **Course title** (if enabled) — always first
-2. **Course category** (if enabled) — always second
-3. **Custom field filters** — in the order defined in the custom field category
-4. **Tags** (if enabled) — always last
-
-This layout is intentional: title and category provide broad, immediate narrowing at the top, while tags — being a cross-cutting dimension — are placed at the end where they complement the other filters without interfering with the custom field order. This order is fixed and cannot be changed without modifying the template.
+The display order of the native filters (course title, category, tags) is configurable independently via the plugin settings. Custom field filters are interleaved between them in the order defined in the custom field category. If two native filters are assigned the same position, the conflict is resolved automatically (title before category, category before tags) and a warning is displayed in the admin settings.
 
 - **Course title**: type any part of the title — suggestions appear automatically after 2 characters
 - **Category**: select a Moodle course category from the dropdown

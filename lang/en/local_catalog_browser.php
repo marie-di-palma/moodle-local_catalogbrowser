@@ -105,19 +105,19 @@ $string['setting_showtagfilter_desc'] = 'If enabled, a tag filter will be displa
 $string['setting_order_titlefilter'] = 'Course title filter position';
 
 // Description for the course title filter position setting.
-$string['setting_order_titlefilter_desc'] = 'Position of the course title filter in the search form. 1 = first, 2 = second, etc. Any value exceeding the total number of active filters, or -1, places it last. In case of conflict with another native filter, title takes priority.';
+$string['setting_order_titlefilter_desc'] = 'Position of the course title filter in the search form. 1 = first, 2 = second, etc. Any value exceeding the total number of active filters, or -1, places it last. In case of conflict with another native filter, title is placed first.';
 
 // Label for the category filter position setting.
 $string['setting_order_categoryfilter'] = 'Category filter position';
 
 // Description for the category filter position setting.
-$string['setting_order_categoryfilter_desc'] = 'Position of the Moodle category filter in the search form. 1 = first, 2 = second, etc. Any value exceeding the total number of active filters, or -1, places it last. In case of conflict, category takes priority over tags.';
+$string['setting_order_categoryfilter_desc'] = 'Position of the Moodle category filter in the search form. 1 = first, 2 = second, etc. Any value exceeding the total number of active filters, or -1, places it last. In case of conflict, category is placed before tags.';
 
 // Label for the tag filter position setting.
 $string['setting_order_tagfilter'] = 'Tag filter position';
 
 // Description for the tag filter position setting.
-$string['setting_order_tagfilter_desc'] = 'Position of the tag filter in the search form. 1 = first, 2 = second, etc. Any value exceeding the total number of active filters, or -1, places it last. Lowest priority in case of conflict with other native filters.';
+$string['setting_order_tagfilter_desc'] = 'Position of the tag filter in the search form. 1 = first, 2 = second, etc. Any value exceeding the total number of active filters, or -1, places it last. In case of conflict, tags are placed last.';
 
 // Label for the maximum tag selection setting.
 $string['setting_maxtagselection'] = 'Maximum selectable tags';
@@ -127,7 +127,7 @@ $string['setting_maxtagselection_desc'] = 'Maximum number of tags a user can sel
 
 // Warning displayed on the catalog page when two native filters share the same
 // configured position. Resolved automatically by priority: title > category > tags.
-$string['setting_order_conflict'] = 'Two or more native filters (title, category, tags) have been assigned the same position. Positions have been adjusted automatically: title > category > tags in case of conflict.';
+$string['setting_order_conflict'] = 'Two or more native filters (title, category, tags) have been assigned the same position. Positions have been adjusted automatically: in case of conflict, title is placed before category, which is placed before tags.';
 
 // Label for the popular tags suggestions toggle.
 $string['setting_showpopulartags'] = 'Show popular tag suggestions';
