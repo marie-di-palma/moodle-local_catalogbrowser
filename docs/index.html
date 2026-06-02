@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Catalog Browser is a free Moodle plugin that adds a filterable course catalog to your site — with custom field filters, tag search, and live AJAX results.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://marie-di-palma.github.io/moodle-local_catalogbrowser/">
+<meta property="og:title" content="Catalog Browser — Moodle plugin">
+<meta property="og:description" content="A free, open-source Moodle plugin that adds a filterable course catalog to your site.">
+<meta property="og:url" content="https://marie-di-palma.github.io/moodle-local_catalogbrowser/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://marie-di-palma.github.io/moodle-local_catalogbrowser/pix/screenshots/catalog_overview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Catalog Browser — Moodle plugin">
+<meta name="twitter:description" content="A free, open-source Moodle plugin that adds a filterable course catalog to your site.">
+<meta name="twitter:image" content="https://marie-di-palma.github.io/moodle-local_catalogbrowser/pix/screenshots/catalog_overview.png">
+<link rel="icon" type="image/svg+xml" href="https://marie-di-palma.github.io/moodle-local_catalogbrowser/pix/icon.svg">
+<title>Catalog Browser — Moodle plugin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f9f8f5; --surface: #ffffff; --border: #e4e2db;
+    --text: #1a1917; --muted: #6b6860; --accent: #2d5be3;
+    --accent-hover: #1e48cc; --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace; --radius: 10px; --radius-lg: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #111110; --surface: #1c1c1a; --border: #2e2e2b;
+      --text: #e8e6e1; --muted: #888780; --accent: #5b82ff; --accent-hover: #7596ff; }
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; font-size: 16px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+  nav { border-bottom: 1px solid var(--border); padding: 14px 0; position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  nav .inner { display: flex; align-items: center; justify-content: space-between; }
+  .nav-brand { font-size: 15px; font-weight: 500; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+  .nav-brand img { width: 24px; height: 24px; }
+  .nav-links { display: flex; gap: 20px; align-items: center; }
+  .nav-links a { font-size: 14px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .nav-links a:hover { color: var(--text); }
+  .lang-switcher { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 99px; overflow: hidden; }
+  .lang-btn { font-size: 13px; font-weight: 500; color: var(--muted); background: transparent; border: none; padding: 4px 11px; cursor: pointer; font-family: var(--font); transition: color 0.15s, background 0.15s; }
+  .lang-btn.active { color: var(--text); background: var(--surface); }
+  .lang-btn:hover:not(.active) { color: var(--text); }
+  .hero { padding: 80px 0 64px; border-bottom: 1px solid var(--border); }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+  .badges img { height: 20px; }
+  .hero h1 { font-size: 44px; font-weight: 500; line-height: 1.12; letter-spacing: -0.025em; margin-bottom: 16px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc { font-size: 18px; color: var(--muted); max-width: 560px; margin-bottom: 6px; line-height: 1.65; }
+  .hero-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+  .hero-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); padding: 11px 22px; font-size: 15px; font-weight: 500; cursor: pointer; text-decoration: none; font-family: var(--font); transition: background 0.15s; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .btn-ghost { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 22px; font-size: 15px; font-family: var(--font); cursor: pointer; text-decoration: none; transition: color 0.15s, border-color 0.15s; }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+  .btn-ghost svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .version-note { font-size: 13px; color: var(--muted); }
+  .section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+  .section h2 { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 28px; }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 48px; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+  .feature-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .feature-icon svg { width: 18px; height: 18px; color: var(--accent); stroke: currentColor; }
+  .feature-card h3 { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .feature-card p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .carousel-outer { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .carousel-viewport { height: 520px; overflow: hidden; position: relative; width: 100%; }
+  .carousel-track { display: flex; transition: transform 0.35s ease; height: 520px; width: 100%; }
+  .carousel-slide { min-width: 100%; width: 100%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--bg); height: 520px; overflow: hidden; }
+  .carousel-slide img { max-width: calc(100% - 48px); max-height: 472px; width: auto; height: auto; display: block; border-radius: 8px; border: 1px solid var(--border); }
+  .carousel-caption { background: var(--surface); border-top: 1px solid var(--border); padding: 12px 16px; font-size: 13px; color: var(--muted); text-align: center; }
+  .carousel-controls { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px; background: var(--surface); border-top: 1px solid var(--border); }
+  .carousel-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.15s; }
+  .carousel-btn:hover { border-color: var(--muted); }
+  .carousel-btn svg { width: 14px; height: 14px; stroke: var(--muted); }
+  .carousel-dots { display: flex; gap: 6px; align-items: center; }
+  .carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); cursor: pointer; transition: background 0.15s; border: none; padding: 0; }
+  .carousel-dot.active { background: var(--accent); }
+  .steps { display: flex; flex-direction: column; gap: 16px; }
+  .step { display: flex; gap: 16px; align-items: flex-start; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; color: var(--muted); margin-top: 1px; }
+  .step-body { font-size: 15px; color: var(--muted); line-height: 1.6; padding-top: 3px; }
+  .step-body strong { color: var(--text); font-weight: 500; }
+  code { font-family: var(--mono); font-size: 13px; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; color: var(--text); }
+  .req-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .req-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: 99px; padding: 5px 14px; color: var(--muted); }
+  .req-pill svg { width: 14px; height: 14px; stroke: var(--accent); flex-shrink: 0; }
+  .whats-new { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
+  .version-tag { display: inline-block; font-size: 12px; font-weight: 500; background: var(--bg); border: 1px solid var(--border); border-radius: 99px; padding: 3px 10px; color: var(--muted); margin-bottom: 14px; }
+  .whats-new ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .whats-new li { font-size: 14px; color: var(--muted); display: flex; gap: 8px; align-items: flex-start; line-height: 1.5; }
+  .whats-new li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+  .changelog-link { display: inline-block; margin-top: 16px; font-size: 13px; color: var(--accent); text-decoration: none; }
+  .changelog-link:hover { text-decoration: underline; }
+  .stay-updated { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; display: flex; gap: 20px; align-items: flex-start; }
+  .stay-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .stay-icon svg { width: 20px; height: 20px; stroke: var(--accent); }
+  .stay-updated h3 { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .stay-updated p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .stay-updated p a { color: var(--accent); text-decoration: none; }
+  .stay-updated p a:hover { text-decoration: underline; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .link-card { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); text-decoration: none; transition: border-color 0.15s; }
+  .link-card:hover { border-color: var(--muted); }
+  .link-card svg { width: 18px; height: 18px; stroke: var(--muted); flex-shrink: 0; }
+  .link-card-text strong { display: block; font-size: 14px; font-weight: 500; color: var(--text); }
+  footer { padding: 36px 0; text-align: center; font-size: 13px; color: var(--muted); line-height: 1.9; border-top: 1px solid var(--border); }
+  footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+  footer a:hover { color: var(--text); }
+  @media (max-width: 760px) {
+    .hero h1 { font-size: 30px; }
+    .hero-desc { font-size: 16px; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .nav-links .hide-mobile { display: none; }
+  }
+  @media (max-width: 480px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .container { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container inner">
+    <a class="nav-brand" href="#">
+      <img src="https://marie-di-palma.github.io/moodle-local_catalogbrowser/pix/icon.svg" alt="">
+      Catalog Browser
+    </a>
+    <div class="nav-links">
+      <a href="#features" class="hide-mobile" data-en="Features" data-fr="Fonctionnalités">Features</a>
+      <a href="#screenshots" class="hide-mobile" data-en="Screenshots" data-fr="Aperçu">Screenshots</a>
+      <a href="#install" class="hide-mobile" data-en="Install" data-fr="Installer">Install</a>
+      <a href="https://github.com/marie-di-palma/moodle-local_catalogbrowser" class="hide-mobile">GitHub</a>
+      <div class="lang-switcher">
+        <button class="lang-btn active" id="btn-en" onclick="applyLang('en')">EN</button>
+        <button class="lang-btn" id="btn-fr" onclick="applyLang('fr')">FR</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="container">
+
+    <section class="hero">
+      <div class="badges">
+        <img src="https://img.shields.io/badge/Moodle-4.3+-orange?logo=moodle" alt="Moodle 4.3+">
+        <img src="https://img.shields.io/badge/PHP-8.3+-777BB4?logo=php&logoColor=white" alt="PHP 8.3+">
+        <img src="https://img.shields.io/badge/License-GPL%20v3-green?logo=gnu" alt="GPL v3">
+        <img src="https://img.shields.io/badge/Version-1.0.1-blue" alt="Version 1.0.1">
+      </div>
+      <h1 data-en="A complete, customisable<br>course catalog for <span>Moodle</span>." data-fr="Un catalogue de cours complet<br>et personnalisable pour <span>Moodle</span>.">A complete, customisable<br>course catalog for <span>Moodle</span>.</h1>
+      <p class="hero-desc" data-en="A free plugin that adds a filterable, searchable course catalog to your Moodle site. Custom field filters, tag search, live AJAX results." data-fr="Un plugin gratuit qui ajoute un catalogue de cours filtrable à votre Moodle. Filtres sur les champs personnalisés, recherche par tags, résultats en direct.">A free plugin that adds a filterable, searchable course catalog to your Moodle site. Custom field filters, tag search, live AJAX results.</p>
+      <p class="hero-sub" data-en="Open-source · GPL v3 · English and French included" data-fr="Open-source · GPL v3 · Anglais et français inclus">Open-source · GPL v3 · English and French included</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="https://github.com/marie-di-palma/moodle-local_catalogbrowser/releases/latest/download/local_catalog_browser.zip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span data-en="Download v1.0.1" data-fr="Télécharger v1.0.1">Download v1.0.1</span>
+        </a>
+        <a class="btn-ghost" href="https://github.com/marie-di-palma/moodle-local_catalogbrowser" target="_blank">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+          GitHub
+        </a>
+      </div>
+      <p class="version-note" data-en="Requires Moodle 4.3+ and PHP 8.3+" data-fr="Nécessite Moodle 4.3+ et PHP 8.3+">Requires Moodle 4.3+ and PHP 8.3+</p>
+    </section>
+
+    <section class="section" id="features">
+      <h2 data-en="Features" data-fr="Fonctionnalités">Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></div>
+          <h3 data-en="Custom field filters" data-fr="Filtres sur champs personnalisés">Custom field filters</h3>
+          <p data-en="Text, select, checkbox, number, textarea — with AJAX autocomplete on text fields." data-fr="Texte, sélection, case à cocher, nombre, zone de texte — avec autocomplétion AJAX sur les champs texte.">Text, select, checkbox, number, textarea — with AJAX autocomplete on text fields.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+          <h3 data-en="Tag search" data-fr="Recherche par tags">Tag search</h3>
+          <p data-en="Pill selector with autocomplete and popular tag suggestions." data-fr="Sélecteur avec autocomplétion et suggestions de tags populaires.">Pill selector with autocomplete and popular tag suggestions.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <h3 data-en="Live results" data-fr="Résultats en direct">Live results</h3>
+          <p data-en="Results update as you filter — no page reload." data-fr="Les résultats se mettent à jour au fil des filtres, sans rechargement.">Results update as you filter — no page reload.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+          <h3 data-en="Configurable order" data-fr="Ordre configurable">Configurable order</h3>
+          <p data-en="Set the display position of every filter independently." data-fr="Définissez la position d'affichage de chaque filtre indépendamment.">Set the display position of every filter independently.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+          <h3 data-en="Guest access" data-fr="Accès invités">Guest access</h3>
+          <p data-en="Let non-logged-in users browse the catalog and preview courses." data-fr="Permettez aux visiteurs non connectés de parcourir le catalogue et voir les cours.">Let non-logged-in users browse the catalog and preview courses.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <h3 data-en="Accessibility" data-fr="Accessibilité">Accessibility</h3>
+          <p data-en="Full keyboard navigation in all dropdowns, ARIA labels on all inputs." data-fr="Navigation clavier complète dans tous les menus déroulants, labels ARIA sur tous les champs.">Full keyboard navigation in all dropdowns, ARIA labels on all inputs.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="screenshots">
+      <h2 data-en="Screenshots" data-fr="Aperçu">Screenshots</h2>
+      <div class="carousel-outer">
+        <div class="carousel-viewport" id="carousel-viewport">
+          <div class="carousel-track" id="carousel-track">
+            <div class="carousel-slide">
+              <img src="https://marie-di-palma.github.io/moodle-local_catalogbrowser/pix/screenshots/catalog_overview.png" alt="Catalog overview">
+            </div>
+            <div class="carousel-slide">
+              <img src="https://marie-di-palma.github.io/moodle-local_catalogbrowser/pix/screenshots/catalog_filtered.png" alt="Catalog with active filters">
+            </div>
+            <div class="carousel-slide">
+              <img src="https://marie-di-palma.github.io/moodle-local_catalogbrowser/pix/screenshots/admin_settings.png" alt="Admin settings">
+            </div>
+            <div class="carousel-slide">
+              <img src="https://marie-di-palma.github.io/moodle-local_catalogbrowser/pix/screenshots/course_preview_guest.png" alt="Course preview for guests">
+            </div>
+          </div>
+        </div>
+        <div class="carousel-caption" id="carousel-caption" data-en="The catalog page with all courses listed." data-fr="La page du catalogue avec tous les cours.">The catalog page with all courses listed.</div>
+        <div class="carousel-controls">
+          <button class="carousel-btn" id="prev-btn" aria-label="Previous">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="carousel-dots" id="carousel-dots"></div>
+          <button class="carousel-btn" id="next-btn" aria-label="Next">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="install">
+      <h2 data-en="Installation" data-fr="Installation">Installation</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body" data-en="Download <code>local_catalog_browser.zip</code> using the button above." data-fr="Téléchargez <code>local_catalog_browser.zip</code> via le bouton ci-dessus.">Download <code>local_catalog_browser.zip</code> using the button above.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body" data-en="In Moodle, go to <strong>Site administration → Plugins → Install plugins</strong> and upload the ZIP." data-fr="Dans Moodle, allez dans <strong>Administration du site → Plugins → Installer des plugins</strong> et uploadez le ZIP.">In Moodle, go to <strong>Site administration → Plugins → Install plugins</strong> and upload the ZIP.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body" data-en="Follow the on-screen prompts to complete the installation." data-fr="Suivez les instructions à l'écran pour finaliser l'installation.">Follow the on-screen prompts to complete the installation.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body" data-en="Go to <strong>Site administration → Plugins → Local plugins → Catalog Browser</strong> to configure everything. The catalog URL is shown at the top of the settings page." data-fr="Rendez-vous dans <strong>Administration du site → Plugins → Plugins locaux → Catalog Browser</strong> pour tout configurer. L'URL du catalogue est affichée en haut de la page de réglages.">Go to <strong>Site administration → Plugins → Local plugins → Catalog Browser</strong> to configure everything. The catalog URL is shown at the top of the settings page.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 data-en="What's new in v1.0.1" data-fr="Nouveautés de la v1.0.1">What's new in v1.0.1</h2>
+      <div class="whats-new">
+        <span class="version-tag">v1.0.1 — June 2026</span>
+        <ul>
+          <li><span data-en="Configurable display position for all filters." data-fr="Position d'affichage configurable pour chaque filtre.">Configurable display position for all filters.</span></li>
+          <li><span data-en="Automatic conflict resolution when two native filters share the same position." data-fr="Résolution automatique des conflits quand deux filtres natifs ont la même position.">Automatic conflict resolution when two native filters share the same position.</span></li>
+          <li><span data-en="Warning in admin settings when a position conflict is detected." data-fr="Avertissement dans les réglages admin en cas de conflit de position.">Warning in admin settings when a position conflict is detected.</span></li>
+          <li><span data-en="French translation added." data-fr="Traduction française ajoutée.">French translation added.</span></li>
+        </ul>
+        <a class="changelog-link" href="https://github.com/marie-di-palma/moodle-local_catalogbrowser/blob/main/CHANGELOG" target="_blank" data-en="Full changelog →" data-fr="Changelog complet →">Full changelog →</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 data-en="Stay updated" data-fr="Rester informé">Stay updated</h2>
+      <div class="stay-updated">
+        <div class="stay-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+        <div>
+          <h3 data-en="Get notified of new releases" data-fr="Être notifié des nouvelles versions">Get notified of new releases</h3>
+          <p data-en='On the <a href="https://github.com/marie-di-palma/moodle-local_catalogbrowser" target="_blank">GitHub repository</a>, click <strong>Watch → Custom → Releases</strong> to get an email whenever a new version is out.' data-fr='Sur le <a href="https://marie-di-palma.github.io/moodle-local_catalogbrowser" target="_blank">dépôt GitHub</a>, cliquez sur <strong>Watch → Custom → Releases</strong> pour recevoir un email à chaque nouvelle version.'>On the <a href="https://github.com/marie-di-palma/moodle-local_catalogbrowser" target="_blank">GitHub repository</a>, click <strong>Watch → Custom → Releases</strong> to get an email whenever a new version is out.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 data-en="A problem?" data-fr="Un problème ?">A problem?</h2>
+      <div class="two-col">
+        <a class="link-card" href="https://github.com/marie-di-palma/moodle-local_catalogbrowser/blob/main/README.md" target="_blank">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <div class="link-card-text">
+            <strong data-en="Full documentation" data-fr="Documentation complète">Full documentation</strong>
+          </div>
+        </a>
+        <a class="link-card" href="https://github.com/marie-di-palma/moodle-local_catalogbrowser/issues/new" target="_blank">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="link-card-text">
+            <strong data-en="Report a bug on GitHub" data-fr="Signaler un bug sur GitHub">Report a bug on GitHub</strong>
+          </div>
+        </a>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p><span data-en="By" data-fr="Par">By</span> <a href="https://github.com/marie-di-palma">Marie Di Palma</a> · <a href="https://github.com/marie-di-palma/moodle-local_catalogbrowser/blob/main/LICENSE">GPL v3</a> · <a href="https://github.com/marie-di-palma/moodle-local_catalogbrowser" data-en="GitHub repository" data-fr="Dépôt GitHub">GitHub repository</a></p>
+  </div>
+</footer>
+
+<script>
+var lang = 'en';
+var current = 0;
+var captions = [
+  { en: 'The catalog page with all courses listed.', fr: 'La page du catalogue avec tous les cours.' },
+  { en: 'Filters in use — category, custom fields and tags.', fr: 'Filtres actifs — catégorie, champs personnalisés et tags.' },
+  { en: 'The settings page — filters, display order, pagination and access.', fr: 'La page de réglages — filtres, ordre, pagination et accès.' },
+  { en: 'Course preview page for non-logged-in users.', fr: 'Page de prévisualisation pour les visiteurs non connectés.' }
+];
+
+var track = document.getElementById('carousel-track');
+var captionEl = document.getElementById('carousel-caption');
+var dotsContainer = document.getElementById('carousel-dots');
+var slides = document.querySelectorAll('.carousel-slide');
+var dots = [];
+
+slides.forEach(function(_, i) {
+  var d = document.createElement('button');
+  d.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+  d.setAttribute('aria-label', 'Slide ' + (i + 1));
+  d.addEventListener('click', function() { goTo(i); });
+  dotsContainer.appendChild(d);
+  dots.push(d);
+});
+
+function goTo(n) {
+  current = (n + slides.length) % slides.length;
+  track.style.transform = 'translateX(-' + (current * 100) + '%)';
+  dots.forEach(function(d, i) { d.classList.toggle('active', i === current); });
+  captionEl.textContent = captions[current][lang];
+}
+
+document.getElementById('prev-btn').addEventListener('click', function() { goTo(current - 1); });
+document.getElementById('next-btn').addEventListener('click', function() { goTo(current + 1); });
+
+function applyLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-fr').classList.toggle('active', l === 'fr');
+  document.querySelectorAll('[data-en]').forEach(function(el) {
+    var val = el.getAttribute('data-' + l);
+    if (val) el.innerHTML = val;
+  });
+  captionEl.textContent = captions[current][lang];
+}
+</script>
+</body>
+</html>
